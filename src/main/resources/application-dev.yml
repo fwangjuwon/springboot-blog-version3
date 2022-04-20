@@ -35,7 +35,7 @@ spring:
   jpa:
     open-in-view: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
@@ -45,3 +45,6 @@ spring:
   output:
     ansi:
       enabled: always
+
+file:
+  path: C:/Users/green/upload/
