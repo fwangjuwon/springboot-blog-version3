@@ -1,13 +1,11 @@
 package site.metacoding.blogv3.service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,8 +43,10 @@ public class PostService {
         //1. 파일 저장 (UUID로 변경해서 저장)
 
         //(1) UUID로 파일 쓰고 경로 리턴받기 
-       String thumnail = UtilFileUpload.write(uploadFolder, postWriteReqDto.getThumnailFile());
-        // Category category = new Category();
+        String thumnail = null;
+        if (!postWriteReqDto.getThumnailFile().isEmpty()) {
+            thumnail = UtilFileUpload.write(uploadFolder, postWriteReqDto.getThumnailFile());
+        }     // Category category = new Category();
         // category.set setId(postWriteReqDto.getCategoryId());
 
         //(2) 카테고리 있는지 확인
@@ -80,8 +80,20 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
     }
 
 
-    public PostRespDto 게시글목록보기(int userId) {
-        List<Post> postsEntity = postRepository.findByUserId(userId);
+    public PostRespDto 게시글목록보기(Integer userId, Pageable pageable) {
+
+        Page<Post> postsEntity = postRepository.findByUserId(userId, pageable);
+        List<Category> categorysEntity = categoryRepository.findByUserId(userId);
+
+        PostRespDto postRespDto = new PostRespDto(
+                postsEntity,
+                categorysEntity);
+        return postRespDto;
+    }
+
+
+        public PostRespDto 게시글카테고리별보기(Integer userId, Integer categoryId, Pageable pageable) {
+        Page<Post> postsEntity = postRepository.findByUserIdAndCategoryId(userId, categoryId, pageable);
         List<Category> categorysEntity = categoryRepository.findByUserId(userId);
 
         PostRespDto postRespDto = new PostRespDto(

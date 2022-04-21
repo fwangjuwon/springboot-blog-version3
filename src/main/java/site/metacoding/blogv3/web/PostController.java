@@ -2,12 +2,15 @@ package site.metacoding.blogv3.web;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import lombok.RequiredArgsConstructor;
 import site.metacoding.blogv3.config.auth.LoginUser;
@@ -46,12 +49,38 @@ public String writeForm(@AuthenticationPrincipal LoginUser loginUser, Model mode
 }
 
     @GetMapping("/user/{id}/post")
-    public String postList(@PathVariable Integer id, @AuthenticationPrincipal LoginUser loginUser, Model model) {
+    public String postList(Integer categoryId, @PathVariable Integer id, @AuthenticationPrincipal LoginUser loginUser,
+            Model model, @PageableDefault(size = 3) Pageable pageable) {
 
         // SELECT * FROM category WHERE userId = :id
         // 카테고리 가져가세요!!
-        PostRespDto postRespDto = postService.게시글목록보기(id);
+        PostRespDto postRespDto = null;
+        if (categoryId == null) {
+            postRespDto = postService.게시글목록보기(id, pageable);
+        } else {
+            postRespDto = postService.게시글카테고리별보기(id, categoryId, pageable);
+        }
+
         model.addAttribute("postRespDto", postRespDto);
         return "/post/list";
-    }    
+    }
+    
+        @GetMapping("/test/user/{id}/post")
+    public @ResponseBody PostRespDto testPostList(Integer categoryId, @PathVariable Integer id,
+            @AuthenticationPrincipal LoginUser loginUser,
+            Model model,
+            @PageableDefault(size = 3) Pageable pageable) {
+        // SELECT * FROM category WHERE userId = :id
+        // 카테고리 가져가세요!!
+        PostRespDto postRespDto = null;
+
+        if (categoryId == null) {
+            postRespDto = postService.게시글목록보기(id, pageable);
+        } else {
+            postRespDto = postService.게시글카테고리별보기(id, categoryId, pageable);
+        }
+
+        return postRespDto;
+    }
+
 }

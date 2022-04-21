@@ -9,7 +9,7 @@
 }
 
 .my_fakeimg {
-    height: 200px;
+    height: 100%;
     background-color: rgb(185, 185, 185);
 }
 
@@ -133,5 +133,10 @@
     .my_navbar_title {
         font-size: 20px !important;
         font-weight: 600 !important;
+    }
+
+    .my_text_title{
+        font-size: 20px !important;
+        font-weight: 600px !important;
     }
 }
