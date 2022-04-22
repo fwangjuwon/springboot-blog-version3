@@ -1,11 +1,13 @@
 package site.metacoding.blogv3.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,10 +86,19 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
 
         Page<Post> postsEntity = postRepository.findByUserId(userId, pageable);
         List<Category> categorysEntity = categoryRepository.findByUserId(userId);
+        List<Integer> pageNumbers = new ArrayList<>();
+        for(int i=0; i<postsEntity.getTotalPages(); i++){
+            pageNumbers.add(i);
+        }
 
         PostRespDto postRespDto = new PostRespDto(
                 postsEntity,
-                categorysEntity);
+                categorysEntity,
+                userId,
+                postsEntity.getNumber()-1,
+                postsEntity.getNumber()+1,
+                pageNumbers
+                );
         return postRespDto;
     }
 
@@ -95,10 +106,17 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
         public PostRespDto 게시글카테고리별보기(Integer userId, Integer categoryId, Pageable pageable) {
         Page<Post> postsEntity = postRepository.findByUserIdAndCategoryId(userId, categoryId, pageable);
         List<Category> categorysEntity = categoryRepository.findByUserId(userId);
-
+     List<Integer> pageNumbers = new ArrayList<>();
+        for(int i=0; i<postsEntity.getTotalPages(); i++){
+            pageNumbers.add(i);
+        }
         PostRespDto postRespDto = new PostRespDto(
                 postsEntity,
-                categorysEntity);
+                categorysEntity,
+                userId,
+                postsEntity.getNumber()-1,
+                postsEntity.getNumber()+1,
+                pageNumbers);
         return postRespDto;
     }
 }
