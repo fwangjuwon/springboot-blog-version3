@@ -1,5 +1,6 @@
 package site.metacoding.blogv3.service;
 
+import java.lang.StackWalker.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -103,20 +104,30 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
     }
 
 
-        public PostRespDto 게시글카테고리별보기(Integer userId, Integer categoryId, Pageable pageable) {
+    public PostRespDto 게시글카테고리별보기(Integer userId, Integer categoryId, Pageable pageable) {
         Page<Post> postsEntity = postRepository.findByUserIdAndCategoryId(userId, categoryId, pageable);
         List<Category> categorysEntity = categoryRepository.findByUserId(userId);
-     List<Integer> pageNumbers = new ArrayList<>();
-        for(int i=0; i<postsEntity.getTotalPages(); i++){
+        List<Integer> pageNumbers = new ArrayList<>();
+        for (int i = 0; i < postsEntity.getTotalPages(); i++) {
             pageNumbers.add(i);
         }
         PostRespDto postRespDto = new PostRespDto(
                 postsEntity,
                 categorysEntity,
                 userId,
-                postsEntity.getNumber()-1,
-                postsEntity.getNumber()+1,
+                postsEntity.getNumber() - 1,
+                postsEntity.getNumber() + 1,
                 pageNumbers);
         return postRespDto;
+    }
+    
+       public Post 게시글상세보기(Integer id) {
+        Optional<Post> postOp = postRepository.findById(id);
+
+        if (postOp.isPresent()) {
+            return postOp.get();
+        } else {
+            throw new CustomException("해당 게시글을 찾을 수 없습니다");
+        }
     }
 }

@@ -26,20 +26,29 @@
                 </div>
                 <div class="my_text_body_sm">{{formatCreateDate}}</div>
                 <div class="my_mt_md_1">
-                    <a href="/user/1/post/1" class="my_success_btn">Read More</a>
+                    <a href="/post/{{id}}" class="my_success_btn">Read More</a>
                 </div>
             </div>
 
         </div>
         {{/postRespDto.posts.content}}
 
-        <div class="my_paging">
+        <div class="my_paging d-flex justify-content-center align-items-center my_mb_lg_1">
 
-            <a href="/user/{{postRespDto.userId}}/post?page={{postRespDto.prev}}">이전</a>
+            <a class="my_atag_none my_mr_sm_1" href="/user/{{postRespDto.userId}}/post?page={{postRespDto.prev}}">
+                <i class="fa-solid fa-angle-left"></i>
+            </a>
+
             {{#postRespDto.pageNumbers}}
-            <a href="/user/{{postRespDto.userId}}/post?page={{.}}">{{.}}</a>
+            <a class="my_atag_none" href="/user/{{postRespDto.userId}}/post?page={{.}}">
+                <div class="my_paging_number_box my_mr_sm_1">
+                    {{.}}
+                </div>
+            </a>
             {{/postRespDto.pageNumbers}}
-            <a href="/user/{{postRespDto.userId}}/post?page={{postRespDto.next}}">다음</a>
+            <a class="my_atag_none my_ml_sm_1" href="/user/{{postRespDto.userId}}/post?page={{postRespDto.next}}">
+                <i class="fa-solid fa-angle-right"></i>
+            </a>
 
         </div>
     </div>

@@ -5,7 +5,8 @@
 
 .my_atag_none:hover{
     text-decoration-line: none;
-
+    color: black;
+    font-weight: 500;
 }
 
 .my_fakeimg {
@@ -118,6 +119,16 @@
 .my_ellipsis {
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.my_text_two_line{
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+     line-height: 20px;
+     height: 40px;
+    overflow:hidden;
+    text-overflow:ellipsis;
 }
 
 @media (max-width: 420px) { 

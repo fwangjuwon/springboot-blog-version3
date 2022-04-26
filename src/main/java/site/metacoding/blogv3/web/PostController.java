@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import lombok.RequiredArgsConstructor;
 import site.metacoding.blogv3.config.auth.LoginUser;
 import site.metacoding.blogv3.domain.category.Category;
+import site.metacoding.blogv3.domain.post.Post;
 import site.metacoding.blogv3.handler.ex.CustomException;
 import site.metacoding.blogv3.service.PostService;
 import site.metacoding.blogv3.web.dto.post.PostRespDto;
@@ -37,16 +38,17 @@ public String write(PostWriteReqDto postWriteReqDto, @AuthenticationPrincipal Lo
 
 
 @GetMapping("/s/post/write-form")
-public String writeForm(@AuthenticationPrincipal LoginUser loginUser, Model model){
+public String writeForm(@AuthenticationPrincipal LoginUser loginUser, Model model) {
     List<Category> categorys = postService.게시글쓰기화면(loginUser.getUser());
 
-    if(categorys.size()==0){
+    if (categorys.size() == 0) {
         throw new CustomException("카테고리 등록이 필요합니다.");
     }
 
-    model.addAttribute("categorys",categorys);
+    model.addAttribute("categorys", categorys);
     return "/post/writeForm";
 }
+
 
     @GetMapping("/user/{id}/post")
     public String postList(Integer categoryId, @PathVariable Integer id, @AuthenticationPrincipal LoginUser loginUser,
@@ -83,4 +85,11 @@ public String writeForm(@AuthenticationPrincipal LoginUser loginUser, Model mode
         return postRespDto;
     }
 
+        @GetMapping("/post/{id}")
+        public String detail(@PathVariable Integer id, Model model, @AuthenticationPrincipal LoginUser loginUser) {
+
+            Post postEntity = postService.게시글상세보기(id);
+            model.addAttribute("post", postEntity);
+        return "/post/detail";
+        }
 }
