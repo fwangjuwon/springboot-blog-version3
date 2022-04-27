@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import site.metacoding.blogv3.domain.user.User;
 import site.metacoding.blogv3.domain.user.UserRepository;
+import site.metacoding.blogv3.domain.visit.Visit;
+import site.metacoding.blogv3.domain.visit.VisitRepository;
 import site.metacoding.blogv3.handler.ex.CustomException;
 import site.metacoding.blogv3.util.email.EmailUtil;
 import site.metacoding.blogv3.web.dto.user.PasswordResetReqDto;
@@ -21,6 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final EmailUtil emailUtil;
+    private final VisitRepository visitRepository;
 
     @Transactional
     public void 패스워드초기화(PasswordResetReqDto passwordResetReqDto) {
@@ -44,11 +47,18 @@ public class UserService {
 
     @Transactional
     public void 회원가입(User user) {
+        //1. save 한번
         String rawPassword = user.getPassword(); // 1234
         String encPassword = bCryptPasswordEncoder.encode(rawPassword); // 해쉬 알고리즘
         user.setPassword(encPassword);
 
-        userRepository.save(user);
+        User userEntity = userRepository.save(user);
+
+    //2. save 두번
+        Visit visit = new Visit();
+        visit.setTotalCount(0L); //long 타입은 L넣어주면 된다.
+        visit.setUser(userEntity);
+        visitRepository.save(visit);
     }
 
     public boolean 유저네임중복체크(String username) {

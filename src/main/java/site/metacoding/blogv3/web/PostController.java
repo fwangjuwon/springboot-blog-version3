@@ -50,17 +50,17 @@ public String writeForm(@AuthenticationPrincipal LoginUser loginUser, Model mode
 }
 
 
-    @GetMapping("/user/{id}/post")
-    public String postList(Integer categoryId, @PathVariable Integer id, @AuthenticationPrincipal LoginUser loginUser,
+    @GetMapping("/user/{pageOwnerId}/post")
+    public String postList(Integer categoryId, @PathVariable Integer pageOwnerId, @AuthenticationPrincipal LoginUser loginUser,
             Model model, @PageableDefault(size = 3) Pageable pageable) {
 
         // SELECT * FROM category WHERE userId = :id
         // 카테고리 가져가세요!!
         PostRespDto postRespDto = null;
         if (categoryId == null) {
-            postRespDto = postService.게시글목록보기(id, pageable);
+            postRespDto = postService.게시글목록보기(pageOwnerId, pageable);
         } else {
-            postRespDto = postService.게시글카테고리별보기(id, categoryId, pageable);
+            postRespDto = postService.게시글카테고리별보기(pageOwnerId, categoryId, pageable);
         }
 
         model.addAttribute("postRespDto", postRespDto);

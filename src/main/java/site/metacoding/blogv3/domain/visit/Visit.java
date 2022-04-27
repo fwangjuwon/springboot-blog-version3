@@ -44,4 +44,8 @@ public class Visit {
     @LastModifiedDate // update 할때만 동작
     private LocalDateTime updateDate;
 
+    public void saveOrUpdate(VisitRepository VisitRepository) {
+        
+    }
+
 }
