@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.samskivert.mustache.Mustache.Visitor;
-
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +20,7 @@ import site.metacoding.blogv3.domain.user.User;
 import site.metacoding.blogv3.domain.user.UserRepository;
 import site.metacoding.blogv3.domain.visit.Visit;
 import site.metacoding.blogv3.domain.visit.VisitRepository;
+import site.metacoding.blogv3.handler.ex.CustomApiException;
 import site.metacoding.blogv3.handler.ex.CustomException;
 import site.metacoding.blogv3.util.UtilFileUpload;
 import site.metacoding.blogv3.web.dto.post.PostRespDto;
@@ -186,12 +184,12 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
     
 
     @Transactional
-       public Post 게시글상세보기(Integer id) {
+    public Post 게시글상세보기(Integer id) {
         Optional<Post> postOp = postRepository.findById(id);
 
         if (postOp.isPresent()) {
             Post postEntity = postOp.get();
-  
+
             //방문자 카운터 증가 
             Optional<Visit> visitOp = visitRepository.findById(postEntity.getUser().getId());
             if (visitOp.isPresent()) {
@@ -204,10 +202,32 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
                 //email 전송
                 //file 쓰기
                 throw new CustomException("일시적인 오류가 발생하였습니다. 관리자에게 문의바랍니다.");
-                        }
+            }
             return postEntity;
         } else {
             throw new CustomException("해당 게시글을 찾을 수 없습니다");
         }
     }
+    
+ @Transactional
+    public void 게시글삭제(Integer id, User principal) {
+
+        Optional<Post> postOp = postRepository.findById(id);
+
+        if (postOp.isPresent()) {
+            Post postEntity = postOp.get();
+
+            // 권한 체크
+            if (principal.getId() == postEntity.getUser().getId()) {
+
+                postRepository.deleteById(id);
+            } else {
+                throw new CustomApiException("삭제 권한이 없습니다");
+            }
+        } else {
+            throw new CustomApiException("해당 게시글이 존재하지 않습니다");
+        }
+
+    }
+
 }

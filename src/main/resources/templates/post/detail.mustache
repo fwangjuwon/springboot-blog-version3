@@ -1,7 +1,8 @@
 {{>/layout/main-header}}
 
 <div class="container">
-
+    <input id="postId" type="hidden" value="{{post.id}}" />
+    <input id="pageOwnerId" type="hidden" value="{{post.user.id}}" />
     <div class="my_post_detail_title">
         <h2> {{post.title}} </h2>
     </div>
@@ -12,9 +13,10 @@
     </div>
     <div>
         <a class="btn btn-outline-success" href="#">수정</a>
-        <button class="btn btn-outline-danger">삭제</button>
+        <button id="btn-delete" class="btn btn-outline-danger">삭제</button>
     </div>
     <br><br>
 </div>
 
+<script src="/js/post/detail.js"></script>
 {{>/layout/footer}}
