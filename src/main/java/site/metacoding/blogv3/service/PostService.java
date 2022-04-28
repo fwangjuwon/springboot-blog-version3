@@ -107,7 +107,8 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
                 pageOwnerId,
                 postsEntity.getNumber()-1,
                 postsEntity.getNumber()+1,
-                pageNumbers
+                pageNumbers,
+                0L
         );
                 
         //방문자 카운터 증가 
@@ -115,9 +116,13 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
         if (pageOwnerOp.isPresent()) {
             User pageOwnerEntity = pageOwnerOp.get();
 
-               Optional<Visit> visitOp = visitRepository.findById(pageOwnerEntity.getId());
+            Optional<Visit> visitOp = visitRepository.findById(pageOwnerEntity.getId());
+               
+
             if (visitOp.isPresent()) {
                 Visit visitEntity = visitOp.get();
+                //dto에 방문자수 담기(request에서 ip주소 받아서 동일하면 증가 안되는 로직!)
+                postRespDto.setTotalCount(visitEntity.getTotalCount());
                 Long totalCount = visitEntity.getTotalCount();
                 visitEntity.setTotalCount(totalCount + 1);
             } else {
@@ -135,9 +140,9 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
     }
 
 
-    public PostRespDto 게시글카테고리별보기(Integer userId, Integer categoryId, Pageable pageable) {
-        Page<Post> postsEntity = postRepository.findByUserIdAndCategoryId(userId, categoryId, pageable);
-        List<Category> categorysEntity = categoryRepository.findByUserId(userId);
+    public PostRespDto 게시글카테고리별보기(Integer pageOwnerId, Integer categoryId, Pageable pageable) {
+        Page<Post> postsEntity = postRepository.findByUserIdAndCategoryId(pageOwnerId, categoryId, pageable);
+        List<Category> categorysEntity = categoryRepository.findByUserId(pageOwnerId);
         List<Integer> pageNumbers = new ArrayList<>();
         for (int i = 0; i < postsEntity.getTotalPages(); i++) {
             pageNumbers.add(i);
@@ -145,10 +150,37 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
         PostRespDto postRespDto = new PostRespDto(
                 postsEntity,
                 categorysEntity,
-                userId,
+                pageOwnerId,
                 postsEntity.getNumber() - 1,
                 postsEntity.getNumber() + 1,
-                pageNumbers);
+                pageNumbers,
+                0L);
+
+                 //방문자 카운터 증가 
+        Optional<User> pageOwnerOp = userRepository.findById(pageOwnerId);
+        if (pageOwnerOp.isPresent()) {
+            User pageOwnerEntity = pageOwnerOp.get();
+
+            Optional<Visit> visitOp = visitRepository.findById(pageOwnerEntity.getId());
+               
+
+            if (visitOp.isPresent()) {
+                Visit visitEntity = visitOp.get();
+                //dto에 방문자수 담기(request에서 ip주소 받아서 동일하면 증가 안되는 로직!)
+                postRespDto.setTotalCount(visitEntity.getTotalCount());
+                Long totalCount = visitEntity.getTotalCount();
+                visitEntity.setTotalCount(totalCount + 1);
+            } else {
+                log.error("terrible", "회원가입할 때 visit이 안만들어지는 심각한 오류");
+                //sms 메세지 전송
+                //email 전송
+                //file 쓰기
+                throw new CustomException("일시적인 오류가 발생하였습니다. 관리자에게 문의바랍니다.");
+                        }
+                    } else {
+                        throw new CustomException("해당 블로그는 없는 페이지 입니다");
+                    }
+        
         return postRespDto;
     }
     
