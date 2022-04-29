@@ -18,3 +18,5 @@ let postDelete = async () => {
         alert("삭제실패");
     }
 }; 
+
+

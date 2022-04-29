@@ -24,6 +24,7 @@ import site.metacoding.blogv3.domain.post.Post;
 import site.metacoding.blogv3.domain.user.User;
 import site.metacoding.blogv3.handler.ex.CustomException;
 import site.metacoding.blogv3.service.PostService;
+import site.metacoding.blogv3.web.dto.post.PostDetailRespDto;
 import site.metacoding.blogv3.web.dto.post.PostRespDto;
 import site.metacoding.blogv3.web.dto.post.PostWriteReqDto;
 
@@ -94,11 +95,14 @@ public String writeForm(@AuthenticationPrincipal LoginUser loginUser, Model mode
 
         @GetMapping("/post/{id}")
         public String detail(@PathVariable Integer id, Model model, @AuthenticationPrincipal LoginUser loginUser) {
+ PostDetailRespDto postDetailRespDto = null;
+            if (loginUser == null) {
+            postDetailRespDto = postService.게시글상세보기(id);
+        } else {
+            postDetailRespDto = postService.게시글상세보기(id, loginUser.getUser());
+        }
 
-            Post postEntity = postService.게시글상세보기(id);
-            model.addAttribute("post", postEntity);
-            
-       
+        model.addAttribute("data", postDetailRespDto);
             return "/post/detail";
         }
         
