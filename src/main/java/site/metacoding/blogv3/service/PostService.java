@@ -96,9 +96,13 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
         Page<Post> postsEntity = postRepository.findByUserId(pageOwnerId, pageable);
         List<Category> categorysEntity = categoryRepository.findByUserId(pageOwnerId);
         List<Integer> pageNumbers = new ArrayList<>();
-        for(int i=0; i<postsEntity.getTotalPages(); i++){
+        for (int i = 0; i < postsEntity.getTotalPages(); i++) {
             pageNumbers.add(i);
         }
+
+        
+        //방문자 카운터 증가 
+       Visit visitEntity = visitIncrease(pageOwnerId);
 
         PostRespDto postRespDto = new PostRespDto(
                 postsEntity,
@@ -107,13 +111,8 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
                 postsEntity.getNumber()-1,
                 postsEntity.getNumber()+1,
                 pageNumbers,
-                0L
-        );
+                visitEntity.getTotalCount());
                 
-        //방문자 카운터 증가 
-        visitIncrease(pageOwnerId);
-
-
         return postRespDto;
     }
 
@@ -125,6 +124,10 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
         for (int i = 0; i < postsEntity.getTotalPages(); i++) {
             pageNumbers.add(i);
         }
+
+        //방문자 카운터 증가 
+       Visit visitEntity = visitIncrease(pageOwnerId);
+
         PostRespDto postRespDto = new PostRespDto(
                 postsEntity,
                 categorysEntity,
@@ -132,10 +135,7 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
                 postsEntity.getNumber() - 1,
                 postsEntity.getNumber() + 1,
                 pageNumbers,
-                0L);
-
-                 //방문자 카운터 증가 
-                 visitIncrease(pageOwnerId);
+                visitEntity.getTotalCount());
         
         return postRespDto;
     }
@@ -218,12 +218,13 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
     }
 
     // 방문자수 증가
-    private void visitIncrease(Integer pageOwnerId) {
+    private Visit visitIncrease(Integer pageOwnerId) {
         Optional<Visit> visitOp = visitRepository.findById(pageOwnerId);
         if (visitOp.isPresent()) {
             Visit visitEntity = visitOp.get();
             Long totalCount = visitEntity.getTotalCount();
             visitEntity.setTotalCount(totalCount + 1);
+            return visitEntity;
         } else {
             log.error("미친 심각", "회원가입할때 Visit이 안 만들어지는 심각한 오류가 있습니다.");
             // sms 메시지 전송
