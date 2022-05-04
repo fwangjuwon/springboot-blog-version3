@@ -4,9 +4,8 @@
     <div class="my_auth_box">
         <div class="my_auth_form_box">
             <div class=" d-flex justify-content-center">
-                <img src="https://i1.sndcdn.com/avatars-000373392764-zp0p80-t500x500.jpg"
-                    class="my_profile_rounded_img_btn_lg" id="profile-img-btn">
-                <form>
+                <img src="" class="my_profile_rounded_img_btn_lg" id="profile-img-btn">
+                <form id="fileForm">
                     <input type="file" class="my_hidden" id="profile-img-input" />
                 </form>
             </div>
@@ -37,6 +36,28 @@
 <script>
     $("#profile-img-btn").click(() => {
         $("#profile-img-input").click();
+    });
+
+    $("#profile-img-input").change((event) => {
+        let f = event.target.files[0];
+
+        if (!f.type.match("image.*")) {
+            alert("이미지를 선택해주세요!");
+            return;
+        }
+
+        let fileForm = $("#fileForm")[0];
+        let formData = new FormData(fileForm);
+        console.log(formData);
+        let reader = new FileReader();
+
+        // 콜백 함수
+        reader.onload = (event) => {
+            $("#profile-img-btn").attr("src", event.target.result);
+        }
+
+        reader.readAsDataURL(f); // 오래 걸림(10초) -> reader.onload();
+
     });
 </script>
 {{>/layout/footer}}
