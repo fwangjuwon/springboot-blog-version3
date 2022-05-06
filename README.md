@@ -57,7 +57,7 @@ categoryId
 createDate
 updateDate
 
-Like
+Love
 id
 postId
 userId

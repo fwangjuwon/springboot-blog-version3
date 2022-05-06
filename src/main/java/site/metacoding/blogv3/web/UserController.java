@@ -1,5 +1,6 @@
 package site.metacoding.blogv3.web;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import site.metacoding.blogv3.config.auth.LoginUser;
+import site.metacoding.blogv3.handler.ex.CustomApiException;
 import site.metacoding.blogv3.service.UserService;
 import site.metacoding.blogv3.util.UtilValid;
 import site.metacoding.blogv3.web.dto.user.JoinReqDto;
@@ -25,13 +27,21 @@ import site.metacoding.blogv3.web.dto.user.PasswordResetReqDto;
 public class UserController {
 
     private final UserService userService;
+    private final HttpSession session;
 
     @PutMapping("/s/api/user/{id}/profile-img")
-    public ResponseEntity<?> profileImgUpdate(@AuthenticationPrincipal LoginUser loginUser, MultipartFile profileImgFile) {
-        // UtilFileUpload.write(uploadFolder, profileImg);
-        userService.프로파일이미지변경(loginUser.getUser(), profileImgFile);
+    public ResponseEntity<?> profileImgUpdate(@AuthenticationPrincipal LoginUser loginUser,
+            MultipartFile profileImgFile) {
+
+        //위에서 받은 id를 사용하면 세션값과 비교해서 권한체크를 해줘야한다.
+        //그냥 세션값을 사용하면 권한체크 필요없음 
+                
+    
+                //session값 변경
+        userService.프로파일이미지변경(loginUser.getUser(), profileImgFile, session);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+    
     @GetMapping("/login-form")
     public String loginForm() {
         return "/user/loginForm";
