@@ -29,7 +29,7 @@ public class UserController {
     private final UserService userService;
     private final HttpSession session;
 
-    @PutMapping("/s/api/user/{id}/profile-img")
+    @PutMapping("/s/api/user/profile-img")
     public ResponseEntity<?> profileImgUpdate(@AuthenticationPrincipal LoginUser loginUser,
             MultipartFile profileImgFile) {
 

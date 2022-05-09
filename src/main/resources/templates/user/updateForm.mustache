@@ -65,14 +65,14 @@
         // form 태그 key:value 데이터 변환 => formData
         let fileForm = $("#fileForm")[0];
         let formData = new FormData(fileForm);
-        let response = await fetch(`/s/api/user/${userId}/profile-img`, {
+        let response = await fetch(`/s/api/user/profile-img`, {
             method: "put",
             body: formData
         });
         if (response.status == 200) {
             imgPreview(event, f);
         } else {
-            alert("프로파일 변경에 실패하였습니다");
+            alert("프로필 변경에 실패하였습니다");
         }
     }
     function imgPreview(event, f) {
