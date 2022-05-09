@@ -1,3 +1,28 @@
+function postLikeClick(id) {
+    let isLike = $(`#heart-${id}`).hasClass("my_fake_like");
+    if (isLike) {
+        postUnLike(id);
+    } else {
+        postLike(id);
+    }
+}
+
+function postLike(id) {
+    // fetch();
+    $(`#heart-${id}`).addClass("my_fake_like");
+    $(`#heart-${id}`).removeClass("my_fake_un_like");
+    $(`#heart-${id}`).removeClass("far");
+    $(`#heart-${id}`).addClass("fa-solid");
+}
+
+function postUnLike(id) {
+    // fetch();
+    $(`#heart-${id}`).addClass("my_fake_un_like");
+    $(`#heart-${id}`).removeClass("my_fake_like");
+    $(`#heart-${id}`).removeClass("fa-solid");
+    $(`#heart-${id}`).addClass("far");
+}
+
 $("#btn-delete").click(() => {
     postDelete();
 });
