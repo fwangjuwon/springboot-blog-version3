@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import site.metacoding.blogv3.domain.category.Category;
 import site.metacoding.blogv3.domain.category.CategoryRepository;
+import site.metacoding.blogv3.domain.love.Love;
+import site.metacoding.blogv3.domain.love.LoveRepository;
 import site.metacoding.blogv3.domain.post.Post;
 import site.metacoding.blogv3.domain.post.PostRepository;
 import site.metacoding.blogv3.domain.user.User;
@@ -39,7 +44,10 @@ public class PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final VisitRepository visitRepository;
+    private final LoveRepository loveRepository;
     private final UserRepository userRepository;
+    private final EntityManager em; // IOC 컨테이너에서 들고온다. 
+
 
     public List<Category> 게시글쓰기화면(User principal){
         return categoryRepository.findByUserId(principal.getId());
@@ -151,7 +159,6 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
 
           //권한체크
           boolean isAuth = authCheck(postEntity.getUser().getId(), principal.getId());
-
           
           //방문자수 증가
           visitIncrease(postEntity.getUser().getId());
@@ -159,6 +166,16 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
           //return값
           postDetailRespDto.setPost(postEntity);
           postDetailRespDto.setPageOwner(isAuth);
+
+          //좋아요 유무 추가하기 (로그인한 사람이 해당 게시글을 좋아하는지)
+        // (1) 로그인한 사람의 userId와 상세보기한 postId로 Love 테이블에서 select해서 row가 있으면 true
+        Optional<Love> loveOp = loveRepository.mFindByUserIdAndPostId(principal.getId(), id);
+        if (loveOp.isPresent()) {
+            postDetailRespDto.setLove(true);
+        } else {
+            postDetailRespDto.setLove(false);
+        }
+
 
           return postDetailRespDto;
     }
@@ -176,10 +193,14 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
         postDetailRespDto.setPost(postEntity);
         postDetailRespDto.setPageOwner(false);
 
+        //좋아요 유무추가하기 (로그인한 사람이 해당 게시글을 좋아하는지)
+        postDetailRespDto.setLove(false);
+
+
         return postDetailRespDto;
     }
     
- @Transactional
+ @Transactional(rollbackFor = CustomApiException.class)
  public void 게시글삭제(Integer id, User principal) {
 
      //게시글 확인
@@ -233,4 +254,47 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
             throw new CustomException("일시적 문제가 생겼습니다. 관리자에게 문의해주세요.");
         }
     }
+
+    //test(영속화,비영속화 연습)
+    
+    //얘가 컨트롤러라고 가정한다면, 
+    //JPQL = Java Persistence Query Language  
+        //아주 복잡한 쿼리(통계쿼리)를 적을 때나, 애초에 dto로 받고싶을때 이걸 쓴다. 
+        public Post emTest1(int id) {
+            em.getTransaction().begin(); //transaction의 시작
+        
+            //쿼리를 컴파일시점에 오류 발견하기 위해 queryDSL을 사용한다. 
+            //동적 쿼리
+            String sql = null;
+            if(id==1){
+                sql = "SELECT * FROM post WHERE id =1";
+            }else{
+               sql="SELECT * FROM post WHERE id =2";
+            }
+            
+            TypedQuery<Post> query = em.createQuery(sql, Post.class);
+        Post postEntity = query.getSingleResult();
+       
+        try{
+        //insert()
+        //update()
+       
+        em.getTransaction().commit();
+    } catch (RuntimeException e) {
+            em.getTransaction().rollback();
+        }
+        em.close(); //transaction의 종료 
+        return postEntity;
+    }
+    
+    //영속화 비영속화
+    public Love emTest2() {
+        Love love = new Love();
+        em.persist(love); //영속화 된 것 -> 컨트롤러단에서 터질까봐 불안하다면, detach시킨다.
+        em.detach(love); //비영속화 -> ignore이런거 안써도 된다. -> 회사에서는 dto를 쓴다. 
+        em.merge(love); //detach했따가 다시 붙이는것 
+        em.remove(love); //영속성 삭제 
+        return love; // messageconverter
+    }
+    
 }
