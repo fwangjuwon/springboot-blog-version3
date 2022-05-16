@@ -20,10 +20,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import lombok.RequiredArgsConstructor;
 import site.metacoding.blogv3.config.auth.LoginUser;
 import site.metacoding.blogv3.domain.category.Category;
-import site.metacoding.blogv3.domain.post.Post;
+import site.metacoding.blogv3.domain.love.Love;
 import site.metacoding.blogv3.domain.user.User;
 import site.metacoding.blogv3.handler.ex.CustomException;
 import site.metacoding.blogv3.service.PostService;
+import site.metacoding.blogv3.web.dto.love.LoveRespDto;
 import site.metacoding.blogv3.web.dto.post.PostDetailRespDto;
 import site.metacoding.blogv3.web.dto.post.PostRespDto;
 import site.metacoding.blogv3.web.dto.post.PostWriteReqDto;
@@ -39,18 +40,22 @@ public class PostController {
     // PostService 사용하세요. 이유는 나중에 category, post글 다 같이 가지고 가야 하기 때문임!!
 
        // /s/api/post/{id}/love
-    @PostMapping("/s/api/post/{id}/love")
-    public ResponseEntity<?> love(@PathVariable Integer id, @AuthenticationPrincipal LoginUser loginUser) {
-        return null; //누가어떤게시물을 좋아요했는지 id, loginuser만 필요 
+    @PostMapping("/s/api/post/{postId}/love")
+    public ResponseEntity<?> love(@PathVariable Integer postId, @AuthenticationPrincipal LoginUser loginUser) {
+        LoveRespDto dto=  postService.좋아요(postId, loginUser.getUser());
+        return new ResponseEntity<>(dto, HttpStatus.CREATED); //누가어떤게시물을 좋아요했는지 id, loginuser만 필요 
     }
 
-    @DeleteMapping("/s/api/post/{id}/love")
-    public ResponseEntity<?> unLove(@PathVariable Integer id, @AuthenticationPrincipal LoginUser loginUser) {
-        return null;
+    @DeleteMapping("/s/api/post/{postId}/love/{loveId}")
+    public ResponseEntity<?> unLove(@PathVariable Integer loveId, @AuthenticationPrincipal LoginUser loginUser) {
+        //login한 유저의 userId와 
+        //love에 있는 userId비교
+        postService.좋아요취소(loveId, loginUser.getUser());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 @PostMapping("/s/post")
-public String write(PostWriteReqDto postWriteReqDto, @AuthenticationPrincipal LoginUser loginUser){
+public String write(PostWriteReqDto postWriteReqDto, @AuthenticationPrincipal LoginUser loginUser) {
     postService.게시글쓰기(postWriteReqDto, loginUser.getUser());
     return "redirect:/user/" + loginUser.getUser().getId() + "/post";
 }

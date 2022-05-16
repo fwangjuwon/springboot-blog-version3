@@ -22,12 +22,13 @@ import site.metacoding.blogv3.domain.love.LoveRepository;
 import site.metacoding.blogv3.domain.post.Post;
 import site.metacoding.blogv3.domain.post.PostRepository;
 import site.metacoding.blogv3.domain.user.User;
-import site.metacoding.blogv3.domain.user.UserRepository;
 import site.metacoding.blogv3.domain.visit.Visit;
 import site.metacoding.blogv3.domain.visit.VisitRepository;
 import site.metacoding.blogv3.handler.ex.CustomApiException;
 import site.metacoding.blogv3.handler.ex.CustomException;
 import site.metacoding.blogv3.util.UtilFileUpload;
+import site.metacoding.blogv3.web.dto.love.LoveRespDto;
+import site.metacoding.blogv3.web.dto.love.LoveRespDto.PostDto;
 import site.metacoding.blogv3.web.dto.post.PostDetailRespDto;
 import site.metacoding.blogv3.web.dto.post.PostRespDto;
 import site.metacoding.blogv3.web.dto.post.PostWriteReqDto;
@@ -45,9 +46,49 @@ public class PostService {
     private final CategoryRepository categoryRepository;
     private final VisitRepository visitRepository;
     private final LoveRepository loveRepository;
-    private final UserRepository userRepository;
     private final EntityManager em; // IOC 컨테이너에서 들고온다. 
 
+    @Transactional
+    public LoveRespDto 좋아요(Integer postId, User principal) {
+
+        //숙제 Love를 dto에 옮겨서 비영속화된 데이터를 응답하기
+        Post postEntity = postFindById(postId);
+        Love love = new Love();
+        love.setUser(principal);
+        love.setPost(postEntity);
+
+        Love loveEntity = loveRepository.save(love);
+
+        //1. dto클래스 생성
+        //2. 모델매퍼함수 호출 내가 만든 dto=모델매퍼메소드호출(loveEntity, 내가만든dto.class)
+
+        LoveRespDto loveRespDto = new LoveRespDto();
+        loveRespDto.setLoveId(loveEntity.getId());
+        PostDto postDto = loveRespDto.new PostDto();
+        postDto.setPostId(postEntity.getId());
+        postDto.setTitle(postEntity.getTitle());
+        loveRespDto.setPost(postDto);
+       
+        return loveRespDto;
+    }
+
+        @Transactional
+        public void 좋아요취소(Integer loveId, User principal) {
+            //권한체크
+            loveFindById(loveId);
+            loveRepository.deleteById(loveId);
+        }
+
+    //좋아요 한 건 찾기 
+  private Love loveFindById(Integer loveId) {
+        Optional<Love> loveOp = loveRepository.findById(loveId);
+        if (loveOp.isPresent()) {
+            Love loveEntity = loveOp.get();
+            return loveEntity;
+        } else {
+            throw new CustomApiException("해당 좋아요가 존재하지 않습니다");
+        }
+    }
 
     public List<Category> 게시글쓰기화면(User principal){
         return categoryRepository.findByUserId(principal.getId());
@@ -155,7 +196,7 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
           PostDetailRespDto postDetailRespDto = new PostDetailRespDto();
       
           // 게시글 가져오기
-          Post postEntity = basicFindById(id);
+          Post postEntity = postFindById(id);
 
           //권한체크
           boolean isAuth = authCheck(postEntity.getUser().getId(), principal.getId());
@@ -185,7 +226,7 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
               PostDetailRespDto postDetailRespDto = new PostDetailRespDto();
 
         //게시글 찾기
-        Post postEntity = basicFindById(id);
+        Post postEntity = postFindById(id);
         //방문자수 증가
         visitIncrease(postEntity.getUser().getId());
 
@@ -204,7 +245,7 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
  public void 게시글삭제(Integer id, User principal) {
 
      //게시글 확인
-     Post postEntity = basicFindById(id);
+     Post postEntity = postFindById(id);
 
      // 권한 체크
      if (authCheck(postEntity.getUser().getId(), principal.getId())) {
@@ -216,7 +257,7 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
  }
 
     //게시글 한 건 찾기 
-    private Post basicFindById(Integer postId) {
+    private Post postFindById(Integer postId) {
         Optional<Post> postOp = postRepository.findById(postId);
         if (postOp.isPresent()) {
             Post postEntity = postOp.get();
