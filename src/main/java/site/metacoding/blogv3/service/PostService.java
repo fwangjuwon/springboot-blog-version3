@@ -189,18 +189,18 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
         return postRespDto;
     }
     
-
+    //로그인 상태일 때의 게시글 상세보기 
       @Transactional
       public PostDetailRespDto 게시글상세보기(Integer id, User principal) {
 
           PostDetailRespDto postDetailRespDto = new PostDetailRespDto();
-      
+
           // 게시글 가져오기
           Post postEntity = postFindById(id);
 
           //권한체크
           boolean isAuth = authCheck(postEntity.getUser().getId(), principal.getId());
-          
+
           //방문자수 증가
           visitIncrease(postEntity.getUser().getId());
 
@@ -209,18 +209,20 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
           postDetailRespDto.setPageOwner(isAuth);
 
           //좋아요 유무 추가하기 (로그인한 사람이 해당 게시글을 좋아하는지)
-        // (1) 로그인한 사람의 userId와 상세보기한 postId로 Love 테이블에서 select해서 row가 있으면 true
-        Optional<Love> loveOp = loveRepository.mFindByUserIdAndPostId(principal.getId(), id);
-        if (loveOp.isPresent()) {
-            postDetailRespDto.setLove(true);
-        } else {
-            postDetailRespDto.setLove(false);
-        }
-
+          // (1) 로그인한 사람의 userId와 상세보기한 postId로 Love 테이블에서 select해서 row가 있으면 true
+          Optional<Love> loveOp = loveRepository.mFindByUserIdAndPostId(principal.getId(), id);
+          if (loveOp.isPresent()) {
+              Love loveEntity = loveOp.get();
+              postDetailRespDto.setLoveId(loveEntity.getId());
+              postDetailRespDto.setLove(true);
+          } else {
+              postDetailRespDto.setLove(false);
+          }
 
           return postDetailRespDto;
-    }
+      }
 
+    //비로그인 상태일 때 상세보기 
       @Transactional
           public PostDetailRespDto 게시글상세보기(Integer id) {
               PostDetailRespDto postDetailRespDto = new PostDetailRespDto();
@@ -236,7 +238,7 @@ throw new CustomException("해당카테고리가 존자해지 않습니다");
 
         //좋아요 유무추가하기 (로그인한 사람이 해당 게시글을 좋아하는지)
         postDetailRespDto.setLove(false);
-
+        postDetailRespDto.setLoveId(0);
 
         return postDetailRespDto;
     }
