@@ -74,7 +74,7 @@ public class UserService {
     } // 더티체킹 (update)
 
     @Transactional
-    public void 회원가입(User user) {
+    public User 회원가입(User user) {
         //1. save 한번
         String rawPassword = user.getPassword(); // 1234
         String encPassword = bCryptPasswordEncoder.encode(rawPassword); // 해쉬 알고리즘
@@ -87,6 +87,8 @@ public class UserService {
         visit.setTotalCount(0L); //long 타입은 L넣어주면 된다.
         visit.setUser(userEntity);
         visitRepository.save(visit);
+
+        return userEntity;
     }
 
     public boolean 유저네임중복체크(String username) {
