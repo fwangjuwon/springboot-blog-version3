@@ -55,8 +55,26 @@ public class PostController {
 
 @PostMapping("/s/post")
 public String write(PostWriteReqDto postWriteReqDto, @AuthenticationPrincipal LoginUser loginUser) {
-    postService.게시글쓰기(postWriteReqDto, loginUser.getUser());
-    return "redirect:/user/" + loginUser.getUser().getId() + "/post";
+    //postService.게시글쓰기(postWriteReqDto, loginUser.getUser());
+    
+    //return "redirect:/user/" + loginUser.getUser().getId() + "/post";
+  
+    //LoginUser테스트
+    System.out.println("---------------------------------------");
+    System.out.println(loginUser.getUsername());
+    System.out.println("---------------------------------------");
+
+    //PostWriteReqDto 테스트 완료 
+    // if (postWriteReqDto.getTitle() == null) {
+    //     throw new NullPointerException("타이틀이 없음");
+    // }
+    // if (postWriteReqDto.getContent() == null) {
+    //     throw new NullPointerException("컨텐트 없음");
+    // }
+    //     if (postWriteReqDto.getCategoryId() == null) {
+    //     throw new NullPointerException("카테고리 아이디 없음");
+    // }
+    return "1";
 }
 
 

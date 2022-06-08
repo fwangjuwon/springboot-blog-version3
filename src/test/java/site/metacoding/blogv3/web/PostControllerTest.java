@@ -18,10 +18,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 import site.metacoding.blogv3.web.dto.post.PostWriteReqDto;
 
-@ActiveProfiles("dev")
-@SpringBootTest(webEnvironment =WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class PostControllerTest {
-        
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -35,22 +35,29 @@ public class PostControllerTest {
                 .build();
     }
 
-   @WithMockUser
+    @WithMockUser
     @Test
-    public void write_테스트() throws Exception{
-        //given
+    public void write_테스트() throws Exception {
+        // given
         PostWriteReqDto postWriteReqDto = PostWriteReqDto.builder()
-            .categoryId(1) //이거 분명터진다.
-            .title("스프링부트")
-            .content("잼있따")
+                .categoryId(1) // 이거 분명히 터짐
+                .title("스프링1강")
+                .content("재밌음")
                 .build();
- 
-        //when
-        ResultActions resultActions = mockMvc.perform(post("/s/post"));
 
-        //then
+        // when
+        ResultActions resultActions = mockMvc.perform(
+                post("/s/post")
+                        .param("title", postWriteReqDto.getTitle())
+                        .param("content", postWriteReqDto.getContent())
+                        .param("categoryId", postWriteReqDto.getCategoryId().toString())
+                        );
+
+        // then
         resultActions
                 .andDo(MockMvcResultHandlers.print());
+        //
+
     }
 
 }
