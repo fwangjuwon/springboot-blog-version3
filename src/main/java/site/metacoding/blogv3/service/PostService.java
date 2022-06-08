@@ -103,7 +103,7 @@ public class PostService {
 
         //(1) UUID로 파일 쓰고 경로 리턴받기 
         String thumnail = null;
-        if (!postWriteReqDto.getThumnailFile().isEmpty()) {
+        if (postWriteReqDto.getThumnailFile() != null) {
             thumnail = UtilFileUpload.write(uploadFolder, postWriteReqDto.getThumnailFile());
         }     // Category category = new Category();
         // category.set setId(postWriteReqDto.getCategoryId());

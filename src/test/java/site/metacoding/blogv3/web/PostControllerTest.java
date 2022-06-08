@@ -8,11 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -35,9 +37,15 @@ public class PostControllerTest {
                 .build();
     }
 
-    @WithMockUser
+    @WithUserDetails("ssar")
     @Test
     public void write_테스트() throws Exception {
+
+        // Authentication authentication =
+        // SecurityContextHolder.getContext().getAuthentication();
+        // LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+
+
         // given
         PostWriteReqDto postWriteReqDto = PostWriteReqDto.builder()
                 .categoryId(1) // 이거 분명히 터짐
@@ -49,15 +57,13 @@ public class PostControllerTest {
         ResultActions resultActions = mockMvc.perform(
                 post("/s/post")
                         .param("title", postWriteReqDto.getTitle())
-                        .param("content", postWriteReqDto.getContent())
-                        .param("categoryId", postWriteReqDto.getCategoryId().toString())
+                                        .param("content", postWriteReqDto.getContent())
+                    .param("categoryId", postWriteReqDto.getCategoryId() + "") 
                         );
 
         // then
         resultActions
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
                 .andDo(MockMvcResultHandlers.print());
-        //
-
     }
-
 }
